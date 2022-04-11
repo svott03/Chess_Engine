@@ -87,7 +87,7 @@ def calculate_score(board, end):
                 black_score += piece_values[piece.piece_type] + getattr(eval, piece_names[piece.piece_type] + "_black_eval")[row][col]
     return white_score - black_score
 
-#ABS
+
 def dfs(board, end, white_turn, alpha, beta, depth):
     if depth == 0 or board.is_varient_end():
         return None, calculate_score(board, end)

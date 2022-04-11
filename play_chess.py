@@ -4,10 +4,7 @@ import time
 import sys
 import chess
 
-fen_board = chess.Board(chess.STARTING_FEN)
-print(fen_board)
-board = [['  ' for i in range(8)] for i in range(8)]
-
+board = chess.Board(chess.STARTING_FEN)
 
 # chess.Board Handling
 def legal_move(x, y, generated_moves, piece_to_move):
@@ -16,12 +13,10 @@ def legal_move(x, y, generated_moves, piece_to_move):
             return True
     return False
 
-def all_legal_moves(x, y, fen_board):
+def all_legal_moves(x, y, board):
     return_moves = []
-    generated_moves = list(fen_board.legal_moves)
+    generated_moves = list(board.legal_moves)
     for move in generated_moves:
-        # print(int(str(move)[1]) == 8 - x)
-        # print(solve.col_values[str(move)[0]] == y)
         if (int(str(move)[1]) == 8 - x and solve.col_values[str(move)[0]] == y):
             return_moves.append((8 - int(str(move)[3]), solve.col_values[str(move)[2]]))
     return return_moves
@@ -77,217 +72,6 @@ starting_order = {(0, 0): pygame.image.load(br.image), (1, 0): pygame.image.load
                   (2, 7): pygame.image.load(wb.image), (3, 7): pygame.image.load(wq.image),
                   (4, 7): pygame.image.load(wk.image), (5, 7): pygame.image.load(wb.image),
                   (6, 7): pygame.image.load(wkn.image), (7, 7): pygame.image.load(wr.image),}
-
-
-def create_board(board):
-    board[0] = [Piece('b', 'r', 'resources/b_rook.png'), Piece('b', 'n', 'resources/b_knight.png'), Piece('b', 'b', 'resources/b_bishop.png'), \
-               Piece('b', 'q', 'resources/b_queen.png'), Piece('b', 'k', 'resources/b_king.png'), Piece('b', 'b', 'resources/b_bishop.png'), \
-               Piece('b', 'n', 'resources/b_knight.png'), Piece('b', 'r', 'resources/b_rook.png')]
-
-    board[7] = [Piece('w', 'R', 'resources/w_rook.png'), Piece('w', 'N', 'resources/w_knight.png'), Piece('w', 'B', 'resources/w_bishop.png'), \
-               Piece('w', 'Q', 'resources/w_queen.png'), Piece('w', 'K', 'resources/w_king.png'), Piece('w', 'B', 'resources/w_bishop.png'), \
-               Piece('w', 'N', 'resources/w_knight.png'), Piece('w', 'R', 'resources/w_rook.png')]
-
-    for i in range(8):
-        board[1][i] = Piece('b', 'p', 'resources/b_pawn.png')
-        board[6][i] = Piece('w', 'P', 'resources/w_pawn.png')
-    return board
-
-
-## returns the input if the input is within the boundaries of the board
-def on_board(position):
-    if position[0] > -1 and position[1] > -1 and position[0] < 8 and position[1] < 8:
-        return True
-
-
-## returns a string that places the rows and columns of the board in a readable manner
-def convert_to_readable(board):
-    output = ''
-
-    for i in board:
-        for j in i:
-            try:
-                output += j.type + ' '
-            except:
-                output += ". "
-        output += '\n'
-    return output
-
-
-## resets "x's" and killable pieces
-def deselect():
-    for row in range(len(board)):
-        for column in range(len(board[0])):
-            if board[row][column] == 'x ':
-                board[row][column] = '  '
-            else:
-                try:
-                    board[row][column].killable = False
-                except:
-                    pass
-    return convert_to_readable(board)
-
-
-## Takes in board as argument then returns 2d array containing positions of valid moves
-def highlight(board):
-    highlighted = []
-    for i in range(len(board)):
-        for j in range(len(board[0])):
-            if board[i][j] == 'x ':
-                highlighted.append((i, j))
-            else:
-                try:
-                    if board[i][j].killable:
-                        highlighted.append((i, j))
-                except:
-                    pass
-    return highlighted
-
-def check_team(moves, index):
-    row, col = index
-    if moves%2 == 0:
-        if board[row][col].team == 'w':
-            return True
-    else:
-        if board[row][col].team == 'b':
-            return True
-
-## This takes in a piece object and its index then runs then checks where that piece can move using separately defined functions for each type of piece.
-def select_moves(piece, index, moves):
-    if check_team(moves, index):
-        if piece.type.lower() == 'p':
-            if piece.team == 'b':
-                return highlight(pawn_moves_b(index))
-            else:
-                return highlight(pawn_moves_w(index))
-
-        if piece.type.lower() == 'k':
-            return highlight(king_moves(index))
-
-        if piece.type.lower() == 'r':
-            return highlight(rook_moves(index))
-
-        if piece.type.lower() == 'b':
-            return highlight(bishop_moves(index))
-
-        if piece.type.lower() == 'q':
-            return highlight(queen_moves(index))
-
-        if piece.type.lower() == 'n':
-            return highlight(knight_moves(index))
-
-
-## Basically, check black and white pawns separately and checks the square above them. If its free that space gets an "x" and if it is occupied by a piece of the opposite team then that piece becomes killable.
-def pawn_moves_b(index):
-    if index[0] == 1:
-        if board[index[0] + 2][index[1]] == '  ' and board[index[0] + 1][index[1]] == '  ':
-            board[index[0] + 2][index[1]] = 'x '
-    bottom3 = [[index[0] + 1, index[1] + i] for i in range(-1, 2)]
-
-    for positions in bottom3:
-        if on_board(positions):
-            if bottom3.index(positions) % 2 == 0:
-                try:
-                    if board[positions[0]][positions[1]].team != 'b':
-                        board[positions[0]][positions[1]].killable = True
-                except:
-                    pass
-            else:
-                if board[positions[0]][positions[1]] == '  ':
-                    board[positions[0]][positions[1]] = 'x '
-    return board
-
-def pawn_moves_w(index):
-    if index[0] == 6:
-        if board[index[0] - 2][index[1]] == '  ' and board[index[0] - 1][index[1]] == '  ':
-            board[index[0] - 2][index[1]] = 'x '
-    top3 = [[index[0] - 1, index[1] + i] for i in range(-1, 2)]
-
-    for positions in top3:
-        if on_board(positions):
-            if top3.index(positions) % 2 == 0:
-                try:
-                    if board[positions[0]][positions[1]].team != 'w':
-                        board[positions[0]][positions[1]].killable = True
-                except:
-                    pass
-            else:
-                if board[positions[0]][positions[1]] == '  ':
-                    board[positions[0]][positions[1]] = 'x '
-    return board
-
-
-## This just checks a 3x3 tile surrounding the king. Empty spots get an "x" and pieces of the opposite team become killable.
-def king_moves(index):
-    for y in range(3):
-        for x in range(3):
-            if on_board((index[0] - 1 + y, index[1] - 1 + x)):
-                if board[index[0] - 1 + y][index[1] - 1 + x] == '  ':
-                    board[index[0] - 1 + y][index[1] - 1 + x] = 'x '
-                else:
-                    if board[index[0] - 1 + y][index[1] - 1 + x].team != board[index[0]][index[1]].team:
-                        board[index[0] - 1 + y][index[1] - 1 + x].killable = True
-    return board
-
-
-## This creates 4 lists for up, down, left and right and checks all those spaces for pieces of the opposite team. The list comprehension is pretty long so if you don't get it just msg me.
-def rook_moves(index):
-    cross = [[[index[0] + i, index[1]] for i in range(1, 8 - index[0])],
-             [[index[0] - i, index[1]] for i in range(1, index[0] + 1)],
-             [[index[0], index[1] + i] for i in range(1, 8 - index[1])],
-             [[index[0], index[1] - i] for i in range(1, index[1] + 1)]]
-
-    for direction in cross:
-        for positions in direction:
-            if on_board(positions):
-                if board[positions[0]][positions[1]] == '  ':
-                    board[positions[0]][positions[1]] = 'x '
-                else:
-                    if board[positions[0]][positions[1]].team != board[index[0]][index[1]].team:
-                        board[positions[0]][positions[1]].killable = True
-                    break
-    return board
-
-
-## Same as the rook but this time it creates 4 lists for the diagonal directions and so the list comprehension is a little bit trickier.
-def bishop_moves(index):
-    diagonals = [[[index[0] + i, index[1] + i] for i in range(1, 8)],
-                 [[index[0] + i, index[1] - i] for i in range(1, 8)],
-                 [[index[0] - i, index[1] + i] for i in range(1, 8)],
-                 [[index[0] - i, index[1] - i] for i in range(1, 8)]]
-
-    for direction in diagonals:
-        for positions in direction:
-            if on_board(positions):
-                if board[positions[0]][positions[1]] == '  ':
-                    board[positions[0]][positions[1]] = 'x '
-                else:
-                    if board[positions[0]][positions[1]].team != board[index[0]][index[1]].team:
-                        board[positions[0]][positions[1]].killable = True
-                    break
-    return board
-
-
-## applies the rook moves to the board then the bishop moves because a queen is basically a rook and bishop in the same position.
-def queen_moves(index):
-    board = rook_moves(index)
-    board = bishop_moves(index)
-    return board
-
-
-## Checks a 5x5 grid around the piece and uses pythagoras to see if if a move is valid. Valid moves will be a distance of sqrt(5) from centre
-def knight_moves(index):
-    for i in range(-2, 3):
-        for j in range(-2, 3):
-            if i ** 2 + j ** 2 == 5:
-                if on_board((index[0] + i, index[1] + j)):
-                    if board[index[0] + i][index[1] + j] == '  ':
-                        board[index[0] + i][index[1] + j] = 'x '
-                    else:
-                        if board[index[0] + i][index[1] + j].team != board[index[0]][index[1]].team:
-                            board[index[0] + i][index[1] + j].killable = True
-    return board
-
 
 WIDTH = 512
 
@@ -367,7 +151,6 @@ def update_display(win, grid, rows, width):
     draw_grid(win, rows, width)
     pygame.display.update()
 
-
 def Find_Node(pos, WIDTH):
     interval = WIDTH / 8
     y, x = pos
@@ -375,20 +158,9 @@ def Find_Node(pos, WIDTH):
     columns = x // interval
     return int(rows), int(columns)
 
-
-def display_potential_moves(positions, grid):
-    for i in positions:
-        x, y = i
-        grid[x][y].colour = BLUE
-        """
-        Displays all the potential moves
-        """
-
-
 def Do_Move(OriginalPos, FinalPosition, WIN):
     starting_order[FinalPosition] = starting_order[OriginalPos]
     starting_order[OriginalPos] = None
-
 
 def remove_highlight(grid):
     for i in range(len(grid)):
@@ -400,8 +172,6 @@ def remove_highlight(grid):
     return grid
 """this takes in 2 co-ordinate parameters which you can get as the position of the piece and then the position of the node it is moving to
 you can get those co-ordinates using my old function for swap"""
-
-create_board(board)
 
 def main(WIN, WIDTH):
     moves = 0
@@ -423,76 +193,40 @@ def main(WIN, WIDTH):
                 y, x = Find_Node(pos, WIDTH)
                 if selected == False:
                     try:
-                        # Me: implement chess board possible moves (convert from string to x and y coordinates)
-                        # Me: Convert board to fen string then check all possible moves, update board on new fenstring
-                        # Possible should be positions (x, y positions)
-                        generated_moves = all_legal_moves(x, y, fen_board)
-                        #possible = select_moves((board[x][y]), (x,y), moves)
-                        possible = generated_moves
-                        for positions in possible:
+                        generated_moves = all_legal_moves(x, y, board)
+                        for positions in generated_moves:
                             row, col = positions
-                            print(f"Row {row} COL {col}")
                             grid[row][col].colour = BLUE
                         piece_to_move = x,y
                         selected = True
                     except:
                         piece_to_move = []
                         print('Can\'t select')
-                    #print(piece_to_move)
                 else:
                     try:
-                        # Me: Add chess library logic to check if legal move (use deselect and remove_highlights accordingly)
                         if (legal_move(x, y, generated_moves, piece_to_move)):
                             row, col = piece_to_move
                             original_piece = solve.col_keys[col] + str(8 - row)
                             new_position = solve.col_keys[y] + str(8-x)
                             print(original_piece + new_position)
-                            fen_board.push_san(original_piece + new_position)
-                            # check checkmate && castle
-                            if (fen_board.is_varient_win()):
-                                print("White Wins!")
-                            elif (fen_board.is_varient_loss()):
-                                print("Black Wins!")
-                            elif (fen_board.is_varient_draw()):
+                            board.push_san(original_piece + new_position)
+                            # Check End State
+                            if (board.is_checkmate()):
+                                if (moves % 2 == 0):
+                                    print("White Wins!")
+                                else:
+                                    print("Black Wins!")
+                            elif(board.is_stalemate() or board.is_insufficient_material()):
                                 print("Draw!")
-                            print(fen_board)
-                            deselect()
                             remove_highlight(grid)
                             Do_Move((col, row), (y, x), WIN)
                             moves += 1
-                            print(fen_board)
+                            print(board)
                         else:
-                            deselect()
                             remove_highlight(grid)
                             selected = False
                             print("Deselected")
-                    #     if board[x][y].killable:
-                    #         row, col = piece_to_move ## coords of original piece
-                    #         board[x][y] = board[row][col]
-                    #         board[row][col] = '  '
-                    #         deselect()
-                    #         remove_highlight(grid)
-                    #         Do_Move((col, row), (y, x), WIN)
-                    #         moves += 1
-                    #         print(convert_to_readable(board))
-                    #     else:
-                    #         deselect()
-                    #         remove_highlight(grid)
-                    #         selected = False
-                    #         print("Deselected")
                     except:
-                    #     # Me: Update chess board accordingly
-                    #     if board[x][y] == 'x ':
-                    #         row, col = piece_to_move
-                    #         board[x][y] = board[row][col]
-                    #         board[row][col] = '  '
-                    #         deselect()
-                    #         remove_highlight(grid)
-                    #         Do_Move((col, row), (y, x), WIN)
-                    #         moves += 1
-                    #         print(convert_to_readable(board))
-                        # else:
-                        deselect()
                         remove_highlight(grid)
                         selected = False
                         print("Invalid move")
