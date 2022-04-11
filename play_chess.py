@@ -10,19 +10,20 @@ board = [['  ' for i in range(8)] for i in range(8)]
 
 
 # chess.Board Handling
+def legal_move(x, y, generated_moves, piece_to_move):
+    for move in generated_moves:
+        if (x == move[0] and y == move[1]):
+            return True
+    return False
+
 def all_legal_moves(x, y, fen_board):
-    print(f"X {x} Y {y}")
     return_moves = []
     generated_moves = list(fen_board.legal_moves)
     for move in generated_moves:
-        print(str(move)[0]+str(move)[1]+str(move)[2]+str(move)[3])
         # print(int(str(move)[1]) == 8 - x)
         # print(solve.col_values[str(move)[0]] == y)
         if (int(str(move)[1]) == 8 - x and solve.col_values[str(move)[0]] == y):
             return_moves.append((8 - int(str(move)[3]), solve.col_values[str(move)[2]]))
-            print(return_moves[0])
-    for move in return_moves:
-        print(move)
     return return_moves
 
 ## Creates a chess piece class that shows what team a piece is on, what type of piece it is and whether or not it can be killed by another selected piece.
@@ -407,6 +408,7 @@ def main(WIN, WIDTH):
     selected = False
     piece_to_move=[]
     grid = make_grid(8, WIDTH)
+    generated_moves = []
     while True:
         pygame.time.delay(50) ##stops cpu dying
         for event in pygame.event.get():
@@ -440,36 +442,60 @@ def main(WIN, WIDTH):
                 else:
                     try:
                         # Me: Add chess library logic to check if legal move (use deselect and remove_highlights accordingly)
-                        if board[x][y].killable == True:
-                            row, col = piece_to_move ## coords of original piece
-                            board[x][y] = board[row][col]
-                            board[row][col] = '  '
+                        if (legal_move(x, y, generated_moves, piece_to_move)):
+                            row, col = piece_to_move
+                            original_piece = solve.col_keys[col] + str(8 - row)
+                            new_position = solve.col_keys[y] + str(8-x)
+                            print(original_piece + new_position)
+                            fen_board.push_san(original_piece + new_position)
+                            # check checkmate && castle
+                            if (fen_board.is_varient_win()):
+                                print("White Wins!")
+                            elif (fen_board.is_varient_loss()):
+                                print("Black Wins!")
+                            elif (fen_board.is_varient_draw()):
+                                print("Draw!")
+                            print(fen_board)
                             deselect()
                             remove_highlight(grid)
                             Do_Move((col, row), (y, x), WIN)
                             moves += 1
-                            print(convert_to_readable(board))
+                            print(fen_board)
                         else:
                             deselect()
                             remove_highlight(grid)
                             selected = False
                             print("Deselected")
+                    #     if board[x][y].killable:
+                    #         row, col = piece_to_move ## coords of original piece
+                    #         board[x][y] = board[row][col]
+                    #         board[row][col] = '  '
+                    #         deselect()
+                    #         remove_highlight(grid)
+                    #         Do_Move((col, row), (y, x), WIN)
+                    #         moves += 1
+                    #         print(convert_to_readable(board))
+                    #     else:
+                    #         deselect()
+                    #         remove_highlight(grid)
+                    #         selected = False
+                    #         print("Deselected")
                     except:
-                        # Me: Update chess board accordingly
-                        if board[x][y] == 'x ':
-                            row, col = piece_to_move
-                            board[x][y] = board[row][col]
-                            board[row][col] = '  '
-                            deselect()
-                            remove_highlight(grid)
-                            Do_Move((col, row), (y, x), WIN)
-                            moves += 1
-                            print(convert_to_readable(board))
-                        else:
-                            deselect()
-                            remove_highlight(grid)
-                            selected = False
-                            print("Invalid move")
+                    #     # Me: Update chess board accordingly
+                    #     if board[x][y] == 'x ':
+                    #         row, col = piece_to_move
+                    #         board[x][y] = board[row][col]
+                    #         board[row][col] = '  '
+                    #         deselect()
+                    #         remove_highlight(grid)
+                    #         Do_Move((col, row), (y, x), WIN)
+                    #         moves += 1
+                    #         print(convert_to_readable(board))
+                        # else:
+                        deselect()
+                        remove_highlight(grid)
+                        selected = False
+                        print("Invalid move")
                     selected = False
 
             update_display(WIN, grid, 8, WIDTH)
