@@ -1,3 +1,4 @@
+from tracemalloc import start
 import solve as solve
 import pygame
 import time
@@ -8,33 +9,6 @@ import copy
 board = chess.Board(chess.STARTING_FEN)
 print(board)
 
-# chess.Board Handling
-def update_state(board):
-    visual = str(board)
-    final_output = [[]]
-    for i in range(8):
-        temp = []
-        for j in range(8):
-            temp.append(visual[i * 15 + j*2])
-        final_output.append(temp)
-    print("BYE")
-    # Me: Update starting_order
-
-def legal_move(x, y, generated_moves, piece_to_move):
-    for move in generated_moves:
-        if (x == move[0] and y == move[1]):
-            return True
-    return False
-
-def all_legal_moves(x, y, board):
-    return_moves = []
-    generated_moves = list(board.legal_moves)
-    for move in generated_moves:
-        if (int(str(move)[1]) == 8 - x and solve.col_values[str(move)[0]] == y):
-            return_moves.append((8 - int(str(move)[3]), solve.col_values[str(move)[2]]))
-    print(len(return_moves))
-    return return_moves
-
 ## Creates a chess piece class that shows what team a piece is on, what type of piece it is and whether or not it can be killed by another selected piece.
 class Piece:
     def __init__(self, team, type, image, killable=False):
@@ -42,7 +16,6 @@ class Piece:
         self.type = type
         self.killable = killable
         self.image = image
-
 
 ## Creates instances of chess pieces, so far we got: pawn, king, rook and bishop
 ## The first parameter defines what team its on and the second, what type of piece it is
@@ -58,7 +31,6 @@ bq = Piece('b', 'q', 'resources/b_queen.png')
 wq = Piece('w', 'Q', 'resources/w_queen.png')
 bkn = Piece('b', 'n', 'resources/b_knight.png')
 wkn = Piece('w', 'N', 'resources/w_knight.png')
-
 
 starting_order = {(0, 0): pygame.image.load(br.image), (1, 0): pygame.image.load(bkn.image),
                   (2, 0): pygame.image.load(bb.image), (3, 0): pygame.image.load(bq.image),
@@ -87,6 +59,59 @@ starting_order = {(0, 0): pygame.image.load(br.image), (1, 0): pygame.image.load
                   (4, 7): pygame.image.load(wk.image), (5, 7): pygame.image.load(wb.image),
                   (6, 7): pygame.image.load(wkn.image), (7, 7): pygame.image.load(wr.image),}
 
+# chess.Board Handling
+def update_state(board):
+    visual = str(board)
+    final_output = [[]]
+    for i in range(8):
+        temp = []
+        for j in range(8):
+            temp.append(visual[i * 16 + j*2])
+        final_output.append(temp)
+    for row in range(1, 9):
+        for col in range(8):
+            c = final_output[row][col]
+            if (c == "p"):
+                starting_order[col, row-1] = pygame.image.load(bp.image)
+            elif (c == "P"):
+                starting_order[col, row-1]  = pygame.image.load(wp.image)
+            elif (c == "n"):
+                starting_order[col, row-1]  = pygame.image.load(bkn.image)
+            elif (c == "N"):
+                starting_order[col, row-1]  = pygame.image.load(wkn.image)
+            elif (c == "b"):
+                starting_order[col, row-1]  = pygame.image.load(bb.image)
+            elif (c == "B"):
+                starting_order[col, row-1]  = pygame.image.load(wb.image)
+            elif (c == "r"):
+                starting_order[col, row-1] = pygame.image.load(br.image)
+            elif (c == "R"):
+                starting_order[col, row-1]  = pygame.image.load(wr.image)
+            elif (c == "q"):
+                starting_order[col, row-1]  = pygame.image.load(bq.image)
+            elif (c == "Q"):
+                starting_order[col, row-1]  = pygame.image.load(wq.image)
+            elif (c == "k"):
+                starting_order[col, row-1]  = pygame.image.load(bk.image)
+            elif (c == "K"):
+                starting_order[col, row-1]  = pygame.image.load(wk.image)
+            elif (c == "."):
+                starting_order[col, row-1]  = None
+
+def legal_move(x, y, generated_moves, piece_to_move):
+    for move in generated_moves:
+        if (x == move[0] and y == move[1]):
+            return True
+    return False
+
+def all_legal_moves(x, y, board):
+    return_moves = []
+    generated_moves = list(board.legal_moves)
+    for move in generated_moves:
+        if (int(str(move)[1]) == 8 - x and solve.col_values[str(move)[0]] == y):
+            return_moves.append((8 - int(str(move)[3]), solve.col_values[str(move)[2]]))
+    return return_moves
+
 WIDTH = 512
 
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
@@ -100,7 +125,6 @@ GREY = (128, 128, 128)
 YELLOW = (204, 204, 0)
 BLUE = (50, 255, 255)
 BLACK = (0, 0, 0)
-
 
 class Node:
     def __init__(self, row, col, width):
@@ -126,7 +150,6 @@ class Node:
         to use blit to draw the chess pieces instead
         """
 
-
 def make_grid(rows, width):
     grid = []
     gap = WIDTH // rows
@@ -144,7 +167,6 @@ This is creating the nodes thats are on the board(so the chess tiles)
 I've put them into a 2d array which is identical to the dimesions of the chessboard
 """
 
-
 def draw_grid(win, rows, width):
     gap = width // 8
     for i in range(rows):
@@ -155,7 +177,6 @@ def draw_grid(win, rows, width):
     """
     The nodes are all white so this we need to draw the grey lines that separate all the chess tiles
     from each other and that is what this function does"""
-
 
 def update_display(win, grid, rows, width):
     for row in grid:
@@ -171,10 +192,6 @@ def Find_Node(pos, WIDTH):
     rows = y // interval
     columns = x // interval
     return int(rows), int(columns)
-
-def Do_Move(OriginalPos, FinalPosition, WIN):
-    starting_order[FinalPosition] = starting_order[OriginalPos]
-    starting_order[OriginalPos] = None
 
 def remove_highlight(grid):
     for i in range(len(grid)):
@@ -215,40 +232,39 @@ def main(WIN, WIDTH):
                         piece_to_move = []
                         print('Can\'t select')
                 else:
-                    # try:
-                    print(f"X {x} Y {y}")
-                    if (legal_move(x, y, generated_moves, piece_to_move)):
-                        row, col = piece_to_move
-                        original_piece = solve.col_keys[col] + str(8 - row)
-                        new_position = solve.col_keys[y] + str(8-x)
-                        current_move = original_piece + new_position
-                        # Temp board for checking special moves
-                        temp_board = copy.deepcopy(board)
-                        # check if pawn for promotion
-                        move = chess.Move(chess.square(col, 7 - row), chess.square(y, 7 - x), chess.QUEEN)
-                        board.push(move)
-                        # Check End State
-                        if (board.is_checkmate()):
-                            if (moves % 2 == 0):
-                                print("White Wins!")
-                            else:
-                                print("Black Wins!")
-                        elif(board.is_stalemate() or board.is_insufficient_material()):
-                            print("Draw!")
+                    try:
+                        if (legal_move(x, y, generated_moves, piece_to_move)):
+                            row, col = piece_to_move
+                            original_piece = solve.col_keys[col] + str(8 - row)
+                            new_position = solve.col_keys[y] + str(8-x)
+                            current_move = original_piece + new_position
+                            # Temp board for checking special moves
+                            temp_board = copy.deepcopy(board)
+                            # check if pawn for promotion
+                            move = chess.Move(chess.square(col, 7 - row), chess.square(y, 7 - x))
+                            if (board.is_zeroing(move) and ((row == 6 and x == 7) or (row == 1 and x == 0))):
+                                move = chess.Move(chess.square(col, 7 - row), chess.square(y, 7 - x), chess.QUEEN)
+                            board.push(move)
+                            # Check End State
+                            if (board.is_checkmate()):
+                                if (moves % 2 == 0):
+                                    print("White Wins!")
+                                else:
+                                    print("Black Wins!")
+                            elif(board.is_stalemate() or board.is_insufficient_material()):
+                                print("Draw!")
+                            remove_highlight(grid)
+                            # Show new state
+                            update_state(board)
+                            moves += 1
+                            print(board)
+                        else:
+                            remove_highlight(grid)
+                            print("Deselected")
+                    except:
                         remove_highlight(grid)
-                        # Show new state
-                        update_state(board)
-                        # Get rid of do_move
-                        Do_Move((col, row), (y, x), WIN)
-                        moves += 1
-                        print(board)
-                    else:
-                        remove_highlight(grid)
-                        print("Deselected")
-                    # except:
-                    #     remove_highlight(grid)
-                    #     selected = False
-                    #     print("Invalid move")
+                        selected = False
+                        print("Invalid move")
                     selected = False
 
             update_display(WIN, grid, 8, WIDTH)
