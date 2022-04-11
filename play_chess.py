@@ -3,10 +3,23 @@ import pygame
 import time
 import sys
 import chess
+import copy
 
 board = chess.Board(chess.STARTING_FEN)
+print(board)
 
 # chess.Board Handling
+def update_state(board):
+    visual = str(board)
+    final_output = [[]]
+    for i in range(8):
+        temp = []
+        for j in range(8):
+            temp.append(visual[i * 15 + j*2])
+        final_output.append(temp)
+    print("BYE")
+    # Me: Update starting_order
+
 def legal_move(x, y, generated_moves, piece_to_move):
     for move in generated_moves:
         if (x == move[0] and y == move[1]):
@@ -19,6 +32,7 @@ def all_legal_moves(x, y, board):
     for move in generated_moves:
         if (int(str(move)[1]) == 8 - x and solve.col_values[str(move)[0]] == y):
             return_moves.append((8 - int(str(move)[3]), solve.col_values[str(move)[2]]))
+    print(len(return_moves))
     return return_moves
 
 ## Creates a chess piece class that shows what team a piece is on, what type of piece it is and whether or not it can be killed by another selected piece.
@@ -185,9 +199,7 @@ def main(WIN, WIDTH):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
             """This quits the program if the player closes the window"""
-
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 y, x = Find_Node(pos, WIDTH)
@@ -203,33 +215,40 @@ def main(WIN, WIDTH):
                         piece_to_move = []
                         print('Can\'t select')
                 else:
-                    try:
-                        if (legal_move(x, y, generated_moves, piece_to_move)):
-                            row, col = piece_to_move
-                            original_piece = solve.col_keys[col] + str(8 - row)
-                            new_position = solve.col_keys[y] + str(8-x)
-                            print(original_piece + new_position)
-                            board.push_san(original_piece + new_position)
-                            # Check End State
-                            if (board.is_checkmate()):
-                                if (moves % 2 == 0):
-                                    print("White Wins!")
-                                else:
-                                    print("Black Wins!")
-                            elif(board.is_stalemate() or board.is_insufficient_material()):
-                                print("Draw!")
-                            remove_highlight(grid)
-                            Do_Move((col, row), (y, x), WIN)
-                            moves += 1
-                            print(board)
-                        else:
-                            remove_highlight(grid)
-                            selected = False
-                            print("Deselected")
-                    except:
+                    # try:
+                    print(f"X {x} Y {y}")
+                    if (legal_move(x, y, generated_moves, piece_to_move)):
+                        row, col = piece_to_move
+                        original_piece = solve.col_keys[col] + str(8 - row)
+                        new_position = solve.col_keys[y] + str(8-x)
+                        current_move = original_piece + new_position
+                        # Temp board for checking special moves
+                        temp_board = copy.deepcopy(board)
+                        # check if pawn for promotion
+                        move = chess.Move(chess.square(col, 7 - row), chess.square(y, 7 - x), chess.QUEEN)
+                        board.push(move)
+                        # Check End State
+                        if (board.is_checkmate()):
+                            if (moves % 2 == 0):
+                                print("White Wins!")
+                            else:
+                                print("Black Wins!")
+                        elif(board.is_stalemate() or board.is_insufficient_material()):
+                            print("Draw!")
                         remove_highlight(grid)
-                        selected = False
-                        print("Invalid move")
+                        # Show new state
+                        update_state(board)
+                        # Get rid of do_move
+                        Do_Move((col, row), (y, x), WIN)
+                        moves += 1
+                        print(board)
+                    else:
+                        remove_highlight(grid)
+                        print("Deselected")
+                    # except:
+                    #     remove_highlight(grid)
+                    #     selected = False
+                    #     print("Invalid move")
                     selected = False
 
             update_display(WIN, grid, 8, WIDTH)
