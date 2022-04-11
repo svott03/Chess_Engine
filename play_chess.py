@@ -1,4 +1,4 @@
-import solve
+import solve as solve
 import pygame
 import time
 import sys
@@ -7,6 +7,23 @@ import chess
 fen_board = chess.Board(chess.STARTING_FEN)
 print(fen_board)
 board = [['  ' for i in range(8)] for i in range(8)]
+
+
+# chess.Board Handling
+def all_legal_moves(x, y, fen_board):
+    print(f"X {x} Y {y}")
+    return_moves = []
+    generated_moves = list(fen_board.legal_moves)
+    for move in generated_moves:
+        print(str(move)[0]+str(move)[1]+str(move)[2]+str(move)[3])
+        # print(int(str(move)[1]) == 8 - x)
+        # print(solve.col_values[str(move)[0]] == y)
+        if (int(str(move)[1]) == 8 - x and solve.col_values[str(move)[0]] == y):
+            return_moves.append((8 - int(str(move)[3]), solve.col_values[str(move)[2]]))
+            print(return_moves[0])
+    for move in return_moves:
+        print(move)
+    return return_moves
 
 ## Creates a chess piece class that shows what team a piece is on, what type of piece it is and whether or not it can be killed by another selected piece.
 class Piece:
@@ -405,7 +422,11 @@ def main(WIN, WIDTH):
                 if selected == False:
                     try:
                         # Me: implement chess board possible moves (convert from string to x and y coordinates)
-                        possible = select_moves((board[x][y]), (x,y), moves)
+                        # Me: Convert board to fen string then check all possible moves, update board on new fenstring
+                        # Possible should be positions (x, y positions)
+                        generated_moves = all_legal_moves(x, y, fen_board)
+                        #possible = select_moves((board[x][y]), (x,y), moves)
+                        possible = generated_moves
                         for positions in possible:
                             row, col = positions
                             print(f"Row {row} COL {col}")
