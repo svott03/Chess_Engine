@@ -31,7 +31,6 @@ piece_names = {
     6: "KING"
 }
 
-board = chess.Board(chess.STARTING_FEN)
 end_state = 44000
 
 def total_material(board, end):
@@ -42,7 +41,6 @@ def total_material(board, end):
             total_material += piece_values[piece.piece_type]
     return total_material
 
-#Lambda function?
 def calculate_score(board, end):
     white_score = 0
     black_score = 0
@@ -55,22 +53,22 @@ def calculate_score(board, end):
             col = col_values[piece[0]]
             if piece.piece_type == 6:
                 if not end:
-                    white_score += piece_values[piece.piece_type] + eval.("KING_white_eval_middle")[row][col]
+                    white_score += piece_values[piece.piece_type] + getattr(eval, "King_white_eval_middle")[row][col]
                 else:
-                    white_score += piece_values[piece.piece_type] + eval.("KING_white_eval_end")[row][col]
+                    white_score += piece_values[piece.piece_type] + getattr(eval, "King_white_eval_end")[row][col]
             else:
-                white_score += piece_values[piece.piece_type] + (piece_names[piece.piece_type] + "_white_eval")[row][col]
+                white_score += piece_values[piece.piece_type] + getattr(eval, piece_names[piece.piece_type] + "_white_eval")[row][col]
         else:
             if piece.piece_type == 6:
                 if not end:
-                    black_score += piece_values[piece.piece_type] + eval.("KING_black_eval_middle")[row][col]
+                    black_score += piece_values[piece.piece_type] + getattr(eval, "King_black_eval_middle")[row][col]
                 else:
-                    black_score += piece_values[piece.piece_type] + eval.("KING_black_eval_end")[row][col]
+                    black_score += piece_values[piece.piece_type] + getattr(eval, "King_black_eval_end")[row][col]
             else:
-                black_score += piece_values[piece.piece_type] + eval.(piece_names[piece.piece_type] + "_black_eval")[row][col]
+                black_score += piece_values[piece.piece_type] + getattr(eval, piece_names[piece.piece_type] + "_black_eval")[row][col]
     return white_score - black_score
 
-# MiniMax + AB Pruning
+#ABS
 def dfs(board, end, white_turn, alpha, beta, depth):
     if depth == 0 or board.is_varient_end():
         return None, calculate_score(board, end)
@@ -87,7 +85,6 @@ def dfs(board, end, white_turn, alpha, beta, depth):
             if (score > max_score):
                 max_score = score
                 best_move = move
-            # AB
             alpha = max(score, alpha)
             if alpha >= beta:
                 break
@@ -103,7 +100,6 @@ def dfs(board, end, white_turn, alpha, beta, depth):
             if (score < min_score):
                 min_score = score
                 best_move = move
-            # AB
             beta = min(score, beta)
             if (beta <= alpha):
                 break

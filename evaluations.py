@@ -1,7 +1,7 @@
 import numpy as np
 
 class positionEvals:
-    self.PAWN_white_eval = np.array([
+    PAWN_white_eval = np.array([
         [0,  0,  0,  0,  0,  0,  0,  0],
         [50, 50, 50, 50, 50, 50, 50, 50],
         [10, 10, 20, 30, 30, 20, 10, 10],
