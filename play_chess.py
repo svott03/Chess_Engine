@@ -1,7 +1,6 @@
 from tracemalloc import start
 import solve
 import pygame
-import time
 import sys
 import chess
 import copy
@@ -61,6 +60,7 @@ starting_order = {(0, 0): pygame.image.load(br.image), (1, 0): pygame.image.load
 
 # chess.Board Handling
 def update_state(board):
+    print(board)
     visual = str(board)
     final_output = [[]]
     for i in range(8):
@@ -216,7 +216,6 @@ def main(WIN, WIDTH):
             solve.bot_move(board, end_state)
             moves += 1
             update_state(board)
-            print(board)
         pygame.time.delay(50) ##stops cpu dying
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -255,16 +254,15 @@ def main(WIN, WIDTH):
                             # Check End State
                             if (board.is_checkmate()):
                                 if (moves % 2 == 0):
-                                    print("White Wins!")
+                                    print("white Wins!")
                                 else:
-                                    print("Black Wins!")
+                                    print("black Wins!")
                             elif(board.is_stalemate() or board.is_insufficient_material()):
-                                print("Draw!")
+                                print("draw!")
                             remove_highlight(grid)
                             # Show new state
                             update_state(board)
                             moves += 1
-                            print(board)
                             selected = False
                         else:
                             remove_highlight(grid)

@@ -111,6 +111,8 @@ def dfs(board, end, white_turn, alpha, beta, depth):
             temp_board = copy.deepcopy(board)
             temp_board.push(move)
             junk, score = dfs(temp_board, end, False, alpha, beta, depth-1)
+            if (board.is_castling(move)):
+                score += 60
             if (score > max_score):
                 max_score = score
                 best_move = move
@@ -126,6 +128,8 @@ def dfs(board, end, white_turn, alpha, beta, depth):
             temp_board = copy.deepcopy(board)
             temp_board.push(move)
             junk, score = dfs(temp_board, end, True, alpha, beta, depth-1)
+            if (board.is_castling(move)):
+                score += 60
             if (score < min_score):
                 min_score = score
                 best_move = move
@@ -136,7 +140,6 @@ def dfs(board, end, white_turn, alpha, beta, depth):
 
 def bot_move(board, end_state):
     move, score = dfs(board, end_state, False, -inf, inf, 4)
-    print(board.legal_moves)
     # check for promotion logic
     from_file = int(move.from_square)/8
     from_rank = int(int(move.from_square) - int(move.from_square)/8 * 8)
@@ -145,6 +148,10 @@ def bot_move(board, end_state):
     if (board.is_zeroing(move) and ((from_rank == 2 and to_rank == 1) or (from_rank == 7 and to_rank == 8))):
         move = chess.Move(chess.square(from_file, from_rank), chess.square(to_file, to_rank), chess.QUEEN)
     board.push(move)
-    print(board)
 
-# AI will push on the board then call update display if (move % 2) == 1 minimax(args)
+# Fix Queen Promote Bug + winning
+# Hard code rook stack
+# Hard code openings
+# Hard code end games
+
+# ML?
