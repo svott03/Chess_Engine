@@ -1,5 +1,5 @@
 from tracemalloc import start
-import solve as solve
+import solve
 import pygame
 import time
 import sys
@@ -210,13 +210,20 @@ def main(WIN, WIDTH):
     piece_to_move=[]
     grid = make_grid(8, WIDTH)
     generated_moves = []
+    end_state = False
     while True:
+        if (moves % 2 == 1): 
+            solve.bot_move(board, end_state)
+            moves += 1
+            update_state(board)
+            print(board)
         pygame.time.delay(50) ##stops cpu dying
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             """This quits the program if the player closes the window"""
+            
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 y, x = Find_Node(pos, WIDTH)
@@ -258,8 +265,10 @@ def main(WIN, WIDTH):
                             update_state(board)
                             moves += 1
                             print(board)
+                            selected = False
                         else:
                             remove_highlight(grid)
+                            selected = False
                             print("Deselected")
                     except:
                         remove_highlight(grid)
