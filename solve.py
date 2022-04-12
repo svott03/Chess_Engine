@@ -140,16 +140,16 @@ def dfs(board, end, white_turn, alpha, beta, depth):
 
 def bot_move(board, end_state):
     move, score = dfs(board, end_state, False, -inf, inf, 4)
-    # check for promotion logic
-    from_file = int(move.from_square)/8
-    from_rank = int(int(move.from_square) - int(move.from_square)/8 * 8)
-    to_file = int(move.to_square)/8
-    to_rank = int(int(move.to_square) - int(move.to_square)/8 * 8)
-    if (board.is_zeroing(move) and ((from_rank == 2 and to_rank == 1) or (from_rank == 7 and to_rank == 8))):
+    # checks for pawn_promotion
+    from_rank = int(move.from_square)/8
+    from_file = int(int(move.from_square) - int(move.from_square)/8 * 8)
+    to_rank = int(move.to_square)/8
+    to_file = int(int(move.to_square) - int(move.to_square)/8 * 8)
+    is_pawn = (board.piece_at(int(chess.square(from_file, from_rank)))) == chess.PAWN
+    if (is_pawn and ((from_rank == 2 and to_rank == 1) or (from_rank == 7 and to_rank == 8))):
         move = chess.Move(chess.square(from_file, from_rank), chess.square(to_file, to_rank), chess.QUEEN)
     board.push(move)
 
-# Fix Queen Promote Bug + winning
 # Hard code rook stack
 # Hard code openings
 # Hard code end games
