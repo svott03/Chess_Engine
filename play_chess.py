@@ -197,7 +197,7 @@ def main(WIN, WIDTH):
             solve.bot_move(board, end_state)
             moves += 1
             update_state(board)
-        pygame.time.delay(50) ##stops cpu dying
+        pygame.time.delay(50)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
