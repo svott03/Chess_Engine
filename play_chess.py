@@ -3,7 +3,6 @@ import solve
 import pygame
 import sys
 import chess
-import copy
 
 board = chess.Board(chess.STARTING_FEN)
 print(board)
@@ -225,8 +224,6 @@ def main(WIN, WIDTH):
                             original_piece = solve.col_keys[col] + str(8 - row)
                             new_position = solve.col_keys[y] + str(8-x)
                             current_move = original_piece + new_position
-                            # Temp board for checking special moves
-                            temp_board = copy.deepcopy(board)
                             # check if pawn for promotion
                             move = chess.Move(chess.square(col, 7 - row), chess.square(y, 7 - x))
                             if (board.is_zeroing(move) and ((row == 6 and x == 7) or (row == 1 and x == 0))):

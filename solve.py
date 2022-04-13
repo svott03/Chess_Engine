@@ -1,7 +1,6 @@
 from cmath import inf
 import chess
 from evaluations import positionEvals as eval
-import copy
 
 piece_values = {
     chess.PAWN: 100,
@@ -108,9 +107,9 @@ def minimax(board, end, white_turn, alpha, beta, depth):
         for move in moves:
             if (total_material(board, end) < end_state):
                 end = True
-            temp_board = copy.deepcopy(board)
-            temp_board.push(move)
-            junk, score = minimax(temp_board, end, False, alpha, beta, depth-1)
+            board.push(move)
+            junk, score = minimax(board, end, False, alpha, beta, depth-1)
+            board.pop()
             if (board.is_castling(move)):
                 score += 60
             if (score > max_score):
@@ -125,9 +124,9 @@ def minimax(board, end, white_turn, alpha, beta, depth):
         for move in moves:
             if (total_material(board, end) < end_state):
                 end = True
-            temp_board = copy.deepcopy(board)
-            temp_board.push(move)
-            junk, score = minimax(temp_board, end, True, alpha, beta, depth-1)
+            board.push(move)
+            junk, score = minimax(board, end, True, alpha, beta, depth-1)
+            board.pop()
             if (board.is_castling(move)):
                 score += 60
             if (score < min_score):
@@ -139,7 +138,7 @@ def minimax(board, end, white_turn, alpha, beta, depth):
         return best_move, min_score
 
 def bot_move(board, end_state):
-    move, score = minimax(board, end_state, False, -inf, inf, 4)
+    move, score = minimax(board, end_state, False, -inf, inf, 5)
     # checks for pawn_promotion
     from_rank = int(move.from_square)/8
     from_file = int(int(move.from_square) - int(move.from_square)/8 * 8)
