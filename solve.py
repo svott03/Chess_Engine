@@ -88,7 +88,7 @@ def calculate_score(board, end):
                 black_score += piece_values[piece.piece_type] + getattr(eval, piece_names[piece.piece_type] + "_black_eval")[row][col]
     return white_score - black_score
 
-def dfs(board, end, white_turn, alpha, beta, depth):
+def minimax(board, end, white_turn, alpha, beta, depth):
     if (board.is_checkmate()):
         if (not white_turn):
             print("White Wins!")
@@ -110,7 +110,7 @@ def dfs(board, end, white_turn, alpha, beta, depth):
                 end = True
             temp_board = copy.deepcopy(board)
             temp_board.push(move)
-            junk, score = dfs(temp_board, end, False, alpha, beta, depth-1)
+            junk, score = minimax(temp_board, end, False, alpha, beta, depth-1)
             if (board.is_castling(move)):
                 score += 60
             if (score > max_score):
@@ -127,7 +127,7 @@ def dfs(board, end, white_turn, alpha, beta, depth):
                 end = True
             temp_board = copy.deepcopy(board)
             temp_board.push(move)
-            junk, score = dfs(temp_board, end, True, alpha, beta, depth-1)
+            junk, score = minimax(temp_board, end, True, alpha, beta, depth-1)
             if (board.is_castling(move)):
                 score += 60
             if (score < min_score):
@@ -139,7 +139,7 @@ def dfs(board, end, white_turn, alpha, beta, depth):
         return best_move, min_score
 
 def bot_move(board, end_state):
-    move, score = dfs(board, end_state, False, -inf, inf, 4)
+    move, score = minimax(board, end_state, False, -inf, inf, 4)
     # checks for pawn_promotion
     from_rank = int(move.from_square)/8
     from_file = int(int(move.from_square) - int(move.from_square)/8 * 8)
@@ -153,5 +153,4 @@ def bot_move(board, end_state):
 # Hard code rook stack
 # Hard code openings
 # Hard code end games
-
 # ML?

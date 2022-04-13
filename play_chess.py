@@ -116,9 +116,6 @@ WIDTH = 512
 
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
 
-""" This is creating the window that we are playing on, it takes a tuple argument which is the dimensions of the window so in this case 800 x 800px
-"""
-
 pygame.display.set_caption("Chess")
 WHITE = (255, 255, 255)
 GREY = (128, 128, 128)
@@ -145,11 +142,6 @@ class Node:
             else:
                 WIN.blit(starting_order[(self.row, self.col)], (self.x, self.y))
 
-        """
-        For now it is drawing a rectangle but eventually we are going to need it
-        to use blit to draw the chess pieces instead
-        """
-
 def make_grid(rows, width):
     grid = []
     gap = WIDTH // rows
@@ -162,10 +154,6 @@ def make_grid(rows, width):
             if (i+j)%2 ==1:
                 grid[i][j].colour = GREY
     return grid
-"""
-This is creating the nodes thats are on the board(so the chess tiles)
-I've put them into a 2d array which is identical to the dimesions of the chessboard
-"""
 
 def draw_grid(win, rows, width):
     gap = width // 8
@@ -173,10 +161,6 @@ def draw_grid(win, rows, width):
         pygame.draw.line(win, BLACK, (0, i * gap), (width, i * gap))
         for j in range(rows):
             pygame.draw.line(win, BLACK, (j * gap, 0), (j * gap, width))
-
-    """
-    The nodes are all white so this we need to draw the grey lines that separate all the chess tiles
-    from each other and that is what this function does"""
 
 def update_display(win, grid, rows, width):
     for row in grid:
@@ -201,8 +185,6 @@ def remove_highlight(grid):
             else:
                 grid[i][j].colour = GREY
     return grid
-"""this takes in 2 co-ordinate parameters which you can get as the position of the piece and then the position of the node it is moving to
-you can get those co-ordinates using my old function for swap"""
 
 def main(WIN, WIDTH):
     moves = 0
@@ -221,7 +203,6 @@ def main(WIN, WIDTH):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            """This quits the program if the player closes the window"""
             
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
