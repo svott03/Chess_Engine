@@ -91,13 +91,10 @@ def calculate_score(board, end):
 def minimax(board, end, white_turn, alpha, beta, depth):
     if (board.is_checkmate()):
         if (not white_turn):
-            print("White Wins!")
             return None, inf
         else:
-            print("Black Wins!")
             return None, -inf
     elif(board.is_stalemate() or board.is_insufficient_material()):
-        print("Draw!")
         return None, 0
     if depth == 0:
         return None, calculate_score(board, end)
@@ -108,11 +105,11 @@ def minimax(board, end, white_turn, alpha, beta, depth):
         for move in moves:
             if (total_material(board, end) < end_state):
                 end = True
-            temp_board = copy.deepcopy(board)
-            temp_board.push(move)
-            junk, score = minimax(temp_board, end, False, alpha, beta, depth-1)
-            if (board.is_castling(move)):
-                score += 60
+            board.push(move)
+            junk, score = minimax(board, end, False, alpha, beta, depth-1)
+            board.pop()
+            # if (board.is_castling(move)):
+            #     score += 60
             if (score > max_score):
                 max_score = score
                 best_move = move
@@ -125,11 +122,11 @@ def minimax(board, end, white_turn, alpha, beta, depth):
         for move in moves:
             if (total_material(board, end) < end_state):
                 end = True
-            temp_board = copy.deepcopy(board)
-            temp_board.push(move)
-            junk, score = minimax(temp_board, end, True, alpha, beta, depth-1)
-            if (board.is_castling(move)):
-                score += 60
+            board.push(move)
+            junk, score = minimax(board, end, True, alpha, beta, depth-1)
+            board.pop()
+            # if (board.is_castling(move)):
+            #     score += 60
             if (score < min_score):
                 min_score = score
                 best_move = move
@@ -138,8 +135,54 @@ def minimax(board, end, white_turn, alpha, beta, depth):
                 break
         return best_move, min_score
 
+def minimax_key(board, move):
+    score = 0
+    if board.is_capture(move):
+        score += 5
+    return score
+
+def sorted_minimax(board, end, alpha, beta, depth):
+    if board.is_checkmate():
+        if board.turn == chess.BLACK:
+            return None, inf
+        else:
+            return None, -inf
+    elif board.is_stalemate() or board.is_insufficient_material():
+        return None, 0
+    if depth == 0:
+        return None, calculate_score(board, end)
+    moves = sorted(board.legal_moves, key=lambda move: minimax_key(board, move), reverse=True)
+    best_move = list(moves)[0]
+    best_score = -inf if board.turn == chess.WHITE else inf
+    for move in moves:
+        if total_material(board, end) < end_state:
+            end = True
+        board.push(move)
+        junk, score = sorted_minimax(board, end, alpha, beta, depth-1)
+        board.pop()
+        if board.turn == chess.WHITE:
+            if (score > best_score):
+                best_score = score
+                best_move = move
+            alpha = max(score, alpha)
+        else:
+            if (score < best_score):
+                best_score = score
+                best_move = move
+            beta = min(score, beta)
+        if beta <= alpha:
+            break
+    return best_move, best_score
+
+def zobrist_hash(board):
+    return 0
+
+
 def bot_move(board, end_state):
-    move, score = minimax(board, end_state, False, -inf, inf, 4)
+    move, score = golfed_minimax(board, end_state, -inf, inf, 4)
+    move_, score_ = minimax(board, end_state, False, -inf, inf, 4)
+    if not move == move_:
+        print("BROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
     # checks for pawn_promotion
     from_rank = int(move.from_square)/8
     from_file = int(int(move.from_square) - int(move.from_square)/8 * 8)
@@ -148,6 +191,10 @@ def bot_move(board, end_state):
     is_pawn = (board.piece_at(int(chess.square(from_file, from_rank)))) == chess.PAWN
     if (is_pawn and ((from_rank == 2 and to_rank == 1) or (from_rank == 7 and to_rank == 8))):
         move = chess.Move(chess.square(from_file, from_rank), chess.square(to_file, to_rank), chess.QUEEN)
+    board.push(move)
+
+def sorted_bot_move(board, end_state):
+    move, score = sorted_minimax(board, end_state, -inf, inf, 4)
     board.push(move)
 
 # Hard code rook stack
